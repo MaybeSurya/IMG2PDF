@@ -1,0 +1,74 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.hero {
+  padding: 64px 0 40px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 113, 227, 0.08);
+  color: var(--blue);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  border: 1px solid rgba(0, 113, 227, 0.15);
+  margin-bottom: 20px;
+  letter-spacing: 0.02em;
+}
+
+.heroTitle {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+
+.heroSub {
+  font-size: 1.15rem;
+  color: var(--ink-2);
+  max-width: 560px;
+  line-height: 1.55;
+}
+
+.main {
+  flex: 1;
+  padding: 40px 0 60px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.section {
+  padding: 28px;
+}
+
+.progressOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+}
+
+@media (max-width: 640px) {
+  .hero { padding: 40px 0 28px; }
+  .heroSub { font-size: 1rem; }
+  .section { padding: 20px; }
+}

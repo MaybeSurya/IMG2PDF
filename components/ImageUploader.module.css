@@ -1,0 +1,56 @@
+.uploadSection {
+  background: var(--glass-light);
+  position: relative;
+}
+
+.uploadBox {
+  border: 2px dashed var(--border);
+  border-radius: 16px;
+  padding: 60px 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+}
+
+.uploadBox:hover {
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(-2px);
+}
+
+.uploadBox.dragover {
+  border-color: var(--primary-light);
+  background: rgba(59, 130, 246, 0.1);
+  transform: scale(1.01);
+}
+
+.uploadIconWrapper {
+  font-size: 3em;
+  color: var(--primary);
+  margin-bottom: 16px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.uploadText {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.uploadSubtext {
+  color: var(--text-secondary);
+  font-size: 0.95em;
+}
+
+@media (max-width: 768px) {
+  .uploadBox {
+    padding: 40px 20px;
+  }
+
+  .uploadIconWrapper {
+    font-size: 2.5em;
+  }
+}

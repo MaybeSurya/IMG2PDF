@@ -1,0 +1,38 @@
+.selected {
+  border-color: var(--primary) !important;
+  transform: scale(1.02);
+  z-index: 2;
+  box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1), var(--shadow-lg);
+}
+
+.selectionBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  z-index: 10;
+  border: 2px solid white;
+}
+
+.indexBadge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: white;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  pointer-events: none;
+}
