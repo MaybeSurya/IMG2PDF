@@ -84,9 +84,10 @@ export default function InstallBanner() {
           style={{
             position: 'fixed', bottom: 20, left: 16, right: 16,
             zIndex: 800,
-            background: 'rgba(255,255,255,0.97)',
+            background: 'var(--card-bg)',
             backdropFilter: 'blur(24px)',
-            border: '1px solid rgba(0,0,0,0.08)',
+            WebkitBackdropFilter: 'blur(24px)',
+            border: '1px solid var(--border)',
             borderRadius: 18,
             boxShadow: '0 12px 40px rgba(0,0,0,0.14)',
             padding: '16px 18px',
@@ -129,7 +130,7 @@ export default function InstallBanner() {
             <button
               className="btn-icon"
               onClick={dismiss}
-              style={{ background: 'transparent', border: '1px solid rgba(0,0,0,0.1)' }}
+              style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--ink)' }}
             >
               <X size={14} />
             </button>
