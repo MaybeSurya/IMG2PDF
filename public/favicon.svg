@@ -1,0 +1,94 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background Squircle Gradient (Onyx Black / Deep Carbon) -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="30%" y2="100%">
+      <stop offset="0%" stop-color="#2a2d34" />
+      <stop offset="100%" stop-color="#111215" />
+    </linearGradient>
+    
+    <!-- Outer Glass Frame Reflection -->
+    <linearGradient id="glass-edge" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.9" />
+    </linearGradient>
+
+    <!-- Crisp Paper Gradient (Silver White) -->
+    <linearGradient id="paper-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#e2e8f0" />
+    </linearGradient>
+
+    <!-- Fold Corner Geometry Gradient -->
+    <linearGradient id="fold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#cbd5e1" />
+    </linearGradient>
+
+    <!-- PDFTools Primary Glowing Badge Gradient (Vibrant Ruby) -->
+    <linearGradient id="badge-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff3e3e" />
+      <stop offset="100%" stop-color="#d80017" />
+    </linearGradient>
+
+    <!-- Cinematic Drop Shadows -->
+    <filter id="shadow-lg" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#000000" flood-opacity="0.45" />
+    </filter>
+    
+    <filter id="shadow-md" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+    
+    <filter id="fold-shadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="-4" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.15" />
+    </filter>
+    
+    <!-- Radiant Red Underglow beneath the app's internal badge -->
+    <filter id="glow-red" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="20" flood-color="#ff3e3e" flood-opacity="0.55" />
+    </filter>
+  </defs>
+
+  <!-- 1. Master Background Canvas Form -->
+  <!-- Heavy shadow mapping for 3D realism -->
+  <rect x="24" y="24" width="464" height="464" rx="112" fill="url(#bg)" filter="url(#shadow-lg)" />
+  <rect x="24" y="24" width="464" height="464" rx="112" fill="none" stroke="url(#glass-edge)" stroke-width="4" />
+
+  <!-- 2. The Abstract White Document (Apparatus) -->
+  <g filter="url(#shadow-md)">
+    <!-- Main Paper Structure -->
+    <path d="M176 100 L306 100 L366 160 L366 350 Q366 380 336 380 L176 380 Q146 380 146 350 L146 130 Q146 100 176 100 Z" fill="url(#paper-grad)" />
+    
+    <!-- Beautiful Folded Ear geometry with localized shadow drop -->
+    <path d="M306 100 L306 145 Q306 160 321 160 L366 160 Z" fill="url(#fold-grad)" filter="url(#fold-shadow)"/>
+    
+    <!-- Subtle document wireframes indicating contents -->
+    <rect x="180" y="150" width="80" height="12" rx="6" fill="#cbd5e1" />
+    <rect x="180" y="176" width="120" height="12" rx="6" fill="#cbd5e1" />
+    <rect x="180" y="202" width="100" height="12" rx="6" fill="#cbd5e1" />
+    
+    <rect x="180" y="234" width="150" height="40" rx="10" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2" />
+  </g>
+
+  <!-- 3. The Central Ruby Identification Badge -->
+  <g filter="url(#glow-red)">
+    <rect x="106" y="270" width="300" height="90" rx="26" fill="url(#badge-grad)" />
+    <!-- High-gloss stroke overlay -->
+    <rect x="106" y="270" width="300" height="90" rx="26" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.35" />
+    
+    <!-- Bold Typography Mapping -->
+    <text x="256" y="328" font-family="'Inter', -apple-system, sans-serif" font-weight="900" font-size="44" fill="#ffffff" text-anchor="middle" letter-spacing="1">
+      PDF<tspan fill="#ffcfcf">Tools</tspan>
+    </text>
+  </g>
+
+  <!-- 4. The Requested Signature Watermark -->
+  <!-- Nested beneath the primary focal point into the carbon chassis -->
+  <text x="256" y="452" font-family="'Inter', -apple-system, sans-serif" font-weight="600" font-size="20" fill="#888c94" text-anchor="middle" letter-spacing="1.5">
+    MaybeSurya.dev
+  </text>
+  
+  <!-- 5. Global Overhead Light Sheen -->
+  <!-- Drops an invisible curved highlight across the top dome -->
+  <path d="M40 120 Q256 -30 472 120 V50 Q256 -50 40 50 Z" fill="#ffffff" opacity="0.04" />
+</svg>
