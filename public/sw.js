@@ -1,4 +1,4 @@
-const CACHE = 'img2pdf-v1'
+const CACHE = 'PDFTools-v1'
 const ASSETS = ['/', '/manifest.json']
 
 self.addEventListener('install', e => {

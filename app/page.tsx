@@ -1,23 +1,27 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CheckCircle2, AlertCircle, Sparkles, Info } from 'lucide-react'
-import ImageUploader from '@/components/ImageUploader'
-import ImagePreview from '@/components/ImagePreview'
-import BatchEditor from '@/components/BatchEditor'
-import PDFSettings from '@/components/PDFSettings'
-import ProgressBar from '@/components/ProgressBar'
-import Footer from '@/components/Footer'
-import CropModal from '@/components/CropModal'
-import ConfirmDeleteModal from '@/components/ConfirmDeleteModal'
+import { Sparkles, Info, CheckCircle2, AlertCircle } from 'lucide-react'
+import ImageToPDFTool from '@/components/ImageToPDFTool'
+import PDFMergerTool from '@/components/PDFMergerTool'
+import ExtractPagesTool from '@/components/ExtractPagesTool'
+import WatermarkTool from '@/components/WatermarkTool'
+import PageNumbersTool from '@/components/PageNumbersTool'
+import RotateTool from '@/components/RotateTool'
+import PDFToImagesTool from '@/components/PDFToImagesTool'
+import MetadataTool from '@/components/MetadataTool'
+import CompressTool from '@/components/CompressTool'
+import BugReportButton from '@/components/BugReportButton'
 import InstallBanner from '@/components/InstallBanner'
 import DarkModeToggle from '@/components/DarkModeToggle'
-import { generatePDF } from '@/lib/pdfGenerator'
+import Footer from '@/components/Footer'
+import Logo from '@/components/Logo'
+import { FileImage, GitMerge, Scissors, Droplets, Hash, RotateCw, Images, Tag, PackageCheck } from 'lucide-react'
 import styles from './page.module.css'
 
-type ToastType = 'success' | 'error' | 'info'
-interface Toast { id: string; type: ToastType; message: string; sub?: string }
+export type ToastType = 'success' | 'error' | 'info'
+export interface Toast { id: string; type: ToastType; message: string; sub?: string }
 
 export interface PDFOptions {
   pageSize: string
@@ -31,17 +35,11 @@ export interface PDFOptions {
   includeWatermark: boolean
 }
 
-export default function Home() {
-  const [images, setImages] = useState<any[]>([])
-  const [selectedImages, setSelectedImages] = useState<Set<number>>(new Set())
-  const [isConverting, setIsConverting] = useState(false)
-  const [progress, setProgress] = useState({ percent: 0, text: '' })
-  const [toasts, setToasts] = useState<Toast[]>([])
-  const [uploaderExpanded, setUploaderExpanded] = useState(true)
+type ToolType = 'img2pdf' | 'mergepdf' | 'extractpdf' | 'watermarkpdf' | 'paginatepdf' | 'rotatepdf' | 'pdf2img' | 'metadata' | 'compress'
 
-  // Modals
-  const [cropIndex, setCropIndex] = useState<number | null>(null)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+export default function Home() {
+  const [activeTool, setActiveTool] = useState<ToolType>('img2pdf')
+  const [toasts, setToasts] = useState<Toast[]>([])
 
   // Register service worker for PWA
   useEffect(() => {
@@ -50,128 +48,11 @@ export default function Home() {
     }
   }, [])
 
-  const [pdfOptions, setPdfOptions] = useState<PDFOptions>({
-    pageSize: 'a4',
-    quality: 0.85,
-    fileName: 'converted-pdf',
-    orientation: 'portrait',
-    margins: 'normal',
-    addPageNumbers: false,
-    pageNumberStyle: 'minimal',
-    pageNumberSize: 9,
-    includeWatermark: false,
-  })
-
   const toast = useCallback((type: ToastType, message: string, sub?: string) => {
     const id = Math.random().toString(36).substr(2, 9)
     setToasts(prev => [...prev, { id, type, message, sub }])
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000)
   }, [])
-
-  // Auto-collapse uploader after adding images
-  useEffect(() => {
-    if (images.length > 0 && uploaderExpanded) {
-      const timer = setTimeout(() => setUploaderExpanded(false), 700)
-      return () => clearTimeout(timer)
-    }
-  }, [images.length])
-
-  const handleImagesSelected = (newImages: any[]) => {
-    setImages(prev => [...prev, ...newImages])
-    toast('success', `${newImages.length} image${newImages.length !== 1 ? 's' : ''} added`)
-  }
-
-  const handleDeleteImage = (index: number) => {
-    const name = images[index]?.name ?? 'image'
-    setImages(prev => prev.filter((_, i) => i !== index))
-    setSelectedImages(prev => {
-      const next = new Set<number>()
-      prev.forEach(i => { if (i < index) next.add(i); else if (i > index) next.add(i - 1) })
-      return next
-    })
-    toast('info', `Removed "${name}"`)
-  }
-
-  const handleDeleteAll = () => {
-    setImages([])
-    setSelectedImages(new Set())
-    setUploaderExpanded(true)
-    setShowDeleteConfirm(false)
-    toast('success', 'All images cleared', 'The queue is empty — add new images to start again')
-  }
-
-  const handleBatchEdit = (editType: string, value?: any) => {
-    if (selectedImages.size === 0) {
-      toast('error', 'No images selected', 'Tap images to select them first')
-      return
-    }
-    const step = 15
-    setImages(prev => prev.map((img, idx) => {
-      if (!selectedImages.has(idx)) return img
-      let n = { ...img }
-      switch (editType) {
-        case 'rotate90':      n.rotation = ((n.rotation || 0) + 90) % 360; break
-        case 'rotate180':     n.rotation = ((n.rotation || 0) + 180) % 360; break
-        case 'rotate270':     n.rotation = ((n.rotation || 0) + 270) % 360; break
-        case 'flipH':         n.flipH = !n.flipH; break
-        case 'brightnessUp':  n.brightness = Math.min(200, (n.brightness || 100) + step); break
-        case 'brightnessDown':n.brightness = Math.max(0, (n.brightness || 100) - step); break
-        case 'contrastUp':    n.contrast   = Math.min(200, (n.contrast || 100) + step); break
-        case 'contrastDown':  n.contrast   = Math.max(0, (n.contrast || 100) - step); break
-        case 'reset':         n = { ...n, rotation: 0, flipH: false, brightness: 100, contrast: 100 }; break
-      }
-      return n
-    }))
-  }
-
-  const handleCropSelected = () => {
-    if (selectedImages.size !== 1) return
-    setCropIndex([...selectedImages][0])
-  }
-
-  const handleCropImage = (index: number) => {
-    setCropIndex(index)
-  }
-
-  const handleCropSave = (croppedData: string) => {
-    if (cropIndex === null) return
-    setImages(prev => prev.map((img, i) => i === cropIndex ? { ...img, data: croppedData } : img))
-    setCropIndex(null)
-    toast('success', 'Image cropped')
-  }
-
-  const handleToggleSelect = (index: number) => {
-    setSelectedImages(prev => {
-      const next = new Set(prev)
-      next.has(index) ? next.delete(index) : next.add(index)
-      return next
-    })
-  }
-
-  const handleSelectAll = () => {
-    setSelectedImages(prev =>
-      prev.size === images.length
-        ? new Set()
-        : new Set(images.map((_, i) => i))
-    )
-  }
-
-  const handleConvert = async () => {
-    if (images.length === 0) {
-      toast('error', 'No images to convert', 'Please add at least one image first')
-      return
-    }
-    setIsConverting(true)
-    setProgress({ percent: 0, text: 'Preparing…' })
-    try {
-      await generatePDF(images, pdfOptions, (percent, text) => setProgress({ percent, text }))
-      toast('success', `PDF ready! ${images.length} page${images.length !== 1 ? 's' : ''}`, 'Your file is downloading now')
-    } catch (err) {
-      toast('error', 'Conversion failed', `${err}`)
-    } finally {
-      setIsConverting(false)
-    }
-  }
 
   const iconFor = (type: ToastType) => {
     if (type === 'success') return <CheckCircle2 size={18} color="var(--success)" />
@@ -181,7 +62,6 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
-      {/* ── Hero header ─────────────────────────────── */}
       <header className={styles.hero}>
         <div className="container">
           <motion.div
@@ -193,135 +73,116 @@ export default function Home() {
               <Sparkles size={13} />
               <span>Free · No upload · 100% browser-based</span>
             </div>
-            <h1 className={styles.heroTitle}>Image to PDF</h1>
-            <p className={styles.heroSub}>
-              Merge and convert images into a beautifully formatted PDF — entirely in your browser.
+            
+            <Logo />
+            
+            <p className={styles.heroSub} style={{ marginTop: '20px' }}>
+              Your universal suite for managing PDFs securely in the browser.
             </p>
+            
+            {/* Keyboard shortcuts hint */}
+            <p style={{ fontSize: '0.75rem', color: 'var(--ink-4)', marginTop: 8 }}>
+              <kbd style={{ background: 'var(--bg-tertiary)', padding: '1px 5px', borderRadius: 4, fontFamily: 'monospace' }}>Ctrl+A</kbd> select all ·{' '}
+              <kbd style={{ background: 'var(--bg-tertiary)', padding: '1px 5px', borderRadius: 4, fontFamily: 'monospace' }}>Del</kbd> remove selected ·{' '}
+              <kbd style={{ background: 'var(--bg-tertiary)', padding: '1px 5px', borderRadius: 4, fontFamily: 'monospace' }}>Esc</kbd> deselect
+            </p>
+
+            {/* Dashboard Grid with Lucide icons */}
+            <div style={{
+              display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(105px, 1fr))', gap: 8, marginTop: 28
+            }}>
+              {([
+                { id: 'img2pdf',      label: 'Image → PDF',   Icon: FileImage   },
+                { id: 'mergepdf',     label: 'Merge PDFs',    Icon: GitMerge    },
+                { id: 'extractpdf',   label: 'Extract Pages', Icon: Scissors    },
+                { id: 'watermarkpdf', label: 'Watermark',     Icon: Droplets    },
+                { id: 'paginatepdf',  label: 'Page Numbers',  Icon: Hash        },
+                { id: 'rotatepdf',    label: 'Rotate',        Icon: RotateCw    },
+                { id: 'pdf2img',      label: 'PDF → Image',   Icon: Images      },
+                { id: 'metadata',     label: 'Metadata',      Icon: Tag         },
+                { id: 'compress',     label: 'Compress',      Icon: PackageCheck },
+              ] as { id: ToolType; label: string; Icon: React.ComponentType<any> }[]).map(({ id, label, Icon }) => {
+                const active = activeTool === id
+                return (
+                  <button
+                    key={id}
+                    onClick={() => setActiveTool(id)}
+                    style={{
+                      padding: '12px 6px', borderRadius: 'var(--r-sm)',
+                      background: active ? 'var(--blue)' : 'var(--bg-secondary)',
+                      color: active ? '#fff' : 'var(--ink-2)',
+                      border: '1px solid transparent',
+                      fontWeight: active ? 600 : 500, fontSize: '0.78rem', cursor: 'pointer', transition: 'all 0.15s',
+                      boxShadow: active ? '0 4px 16px rgba(0,113,227,0.25)' : 'initial',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6
+                    }}
+                  >
+                    <Icon size={18} strokeWidth={active ? 2.5 : 1.5} />
+                    {label}
+                  </button>
+                )
+              })}
+            </div>
+
           </motion.div>
         </div>
       </header>
 
-      {/* ── Main ────────────────────────────────────── */}
       <main className={styles.main}>
         <div className="container">
-          <div className={styles.stack}>
-
-            {/* Uploader */}
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              <ImageUploader
-                onImagesSelected={handleImagesSelected}
-                isExpanded={uploaderExpanded}
-                onToggleExpand={() => setUploaderExpanded(x => !x)}
-                imageCount={images.length}
-              />
-            </motion.section>
-
-            {/* Image grid + batch editor */}
-            <AnimatePresence>
-              {images.length > 0 && (
-                <motion.section
-                  key="grid"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <div className={`glass ${styles.section}`}>
-                    <BatchEditor
-                      selectedCount={selectedImages.size}
-                      totalCount={images.length}
-                      onSelectAll={handleSelectAll}
-                      onApplyEdit={handleBatchEdit}
-                      onDeleteAll={() => setShowDeleteConfirm(true)}
-                      onCropSelected={handleCropSelected}
-                    />
-                    <ImagePreview
-                      images={images}
-                      selectedImages={selectedImages}
-                      onToggleSelect={handleToggleSelect}
-                      onDeleteImage={handleDeleteImage}
-                      onCropImage={handleCropImage}
-                    />
-                  </div>
-                </motion.section>
-              )}
-            </AnimatePresence>
-
-            {/* PDF Settings */}
-            <AnimatePresence>
-              {images.length > 0 && (
-                <motion.section
-                  key="settings"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.4, delay: 0.05 }}
-                >
-                  <div className={`glass ${styles.section}`}>
-                    <PDFSettings
-                      options={pdfOptions}
-                      imageCount={images.length}
-                      onChange={setPdfOptions}
-                      onConvert={handleConvert}
-                      isLoading={isConverting}
-                    />
-                  </div>
-                </motion.section>
-              )}
-            </AnimatePresence>
-
-            {/* Progress */}
-            <AnimatePresence>
-              {isConverting && (
-                <motion.div
-                  key="progress"
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  className={styles.progressOverlay}
-                >
-                  <ProgressBar percent={progress.percent} text={progress.text} />
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-          </div>
+          <AnimatePresence mode="wait">
+            {activeTool === 'img2pdf' && (
+              <motion.div key="img2pdf" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                <ImageToPDFTool toast={toast} />
+              </motion.div>
+            )}
+            {activeTool === 'mergepdf' && (
+              <motion.div key="mergepdf" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                <PDFMergerTool toast={toast} />
+              </motion.div>
+            )}
+            {activeTool === 'extractpdf' && (
+              <motion.div key="extractpdf" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                <ExtractPagesTool toast={toast} />
+              </motion.div>
+            )}
+            {activeTool === 'watermarkpdf' && (
+              <motion.div key="watermarkpdf" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                <WatermarkTool toast={toast} />
+              </motion.div>
+            )}
+            {activeTool === 'paginatepdf' && (
+              <motion.div key="paginatepdf" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                <PageNumbersTool toast={toast} />
+              </motion.div>
+            )}
+            {activeTool === 'rotatepdf' && (
+              <motion.div key="rotatepdf" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                <RotateTool toast={toast} />
+              </motion.div>
+            )}
+            {activeTool === 'pdf2img' && (
+              <motion.div key="pdf2img" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                <PDFToImagesTool toast={toast} />
+              </motion.div>
+            )}
+            {activeTool === 'metadata' && (
+              <motion.div key="metadata" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                <MetadataTool toast={toast} />
+              </motion.div>
+            )}
+            {activeTool === 'compress' && (
+              <motion.div key="compress" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                <CompressTool toast={toast} />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </main>
 
       <DarkModeToggle />
+      <BugReportButton />
       <Footer />
-
-      {/* ── Crop modal ──────────────────────────────── */}
-      <AnimatePresence>
-        {cropIndex !== null && images[cropIndex] && (
-          <CropModal
-            key="crop"
-            imageData={images[cropIndex].data}
-            imageName={images[cropIndex].name}
-            onSave={handleCropSave}
-            onClose={() => setCropIndex(null)}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* ── Confirm delete modal ─────────────────────── */}
-      <AnimatePresence>
-        {showDeleteConfirm && (
-          <ConfirmDeleteModal
-            key="del"
-            count={images.length}
-            onConfirm={handleDeleteAll}
-            onCancel={() => setShowDeleteConfirm(false)}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* ── PWA Install Banner ───────────────────────── */}
       <InstallBanner />
 
       {/* ── Premium toast notifications ─────────────── */}

@@ -1,4 +1,5 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
+import { markPDF } from '@/lib/pdfMetadata'
 
 interface PDFOptions {
   pageSize: string
@@ -71,7 +72,7 @@ function makeWatermarkDataUrl(): string {
   const getFont = (weight: string) => `${weight} ${fontSize}px -apple-system, "Inter", "San Francisco", sans-serif`;
 
   ctx.font = getFont('700');
-  const part1 = "IMG2PDF";
+  const part1 = "PDFTools";
   const part1Width = ctx.measureText(part1).width;
 
   ctx.font = getFont('500');
@@ -81,7 +82,7 @@ function makeWatermarkDataUrl(): string {
   const totalWidth = part1Width + part2Width;
   const startX = (W - totalWidth) / 2;
 
-  // Draw "IMG2PDF" (Bold, Pure White)
+  // Draw "PDFTools" (Bold, Pure White)
   ctx.font = getFont('800');
   ctx.fillStyle = '#ffffff';
   ctx.textAlign = 'left';
@@ -131,11 +132,11 @@ export async function generatePDF(
 
   // ── Inject metadata ──────────────────────────────────────
   pdf.setTitle(options.fileName || 'Converted PDF')
-  pdf.setAuthor('IMG2PDF by MaybeSurya.dev')
-  pdf.setProducer('IMG2PDF — https://img2pdf.maybesurya.dev')
-  pdf.setCreator('IMG2PDF by MaybeSurya.dev (https://img2pdf.maybesurya.dev)')
-  pdf.setSubject(`Generated with IMG2PDF — ${images.length} image${images.length !== 1 ? 's' : ''} converted`)
-  pdf.setKeywords(['img2pdf', 'MaybeSurya.dev', 'image', 'pdf', 'converter'])
+  pdf.setAuthor('PDFTools by MaybeSurya.dev')
+  pdf.setProducer('PDFTools — https://PDFTools.maybesurya.dev')
+  pdf.setCreator('PDFTools by MaybeSurya.dev (https://PDFTools.maybesurya.dev)')
+  pdf.setSubject(`Generated with PDFTools — ${images.length} image${images.length !== 1 ? 's' : ''} converted`)
+  pdf.setKeywords(['PDFTools', 'MaybeSurya.dev', 'image', 'pdf', 'converter'])
   pdf.setCreationDate(new Date())
   pdf.setModificationDate(new Date())
 
@@ -252,6 +253,7 @@ export async function generatePDF(
   }
 
   onProgress(98, 'Generating file…')
+  markPDF(pdf)
   const bytes = await pdf.save()
   onProgress(100, 'Done!')
 

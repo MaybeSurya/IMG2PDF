@@ -56,7 +56,7 @@ export default function InstallBanner() {
     android: {
       icon: <Smartphone size={18} />,
       title: 'Install on Android',
-      msg: 'Add IMG2PDF to your home screen for the full app experience.',
+      msg: 'Add PDFTools to your home screen for the full app experience.',
       cta: 'Install App',
     },
     ios: {
@@ -68,7 +68,7 @@ export default function InstallBanner() {
     desktop: {
       icon: <Monitor size={18} />,
       title: 'Install Web App',
-      msg: 'Install IMG2PDF on your computer for faster access.',
+      msg: 'Install PDFTools on your computer for faster access.',
       cta: 'Install',
     },
   }

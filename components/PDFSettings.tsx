@@ -1,6 +1,6 @@
 'use client'
 
-import { Download, Loader2, FileText, Layout, Maximize2, Hash, Droplets, ArrowUpDown, Heart, Info, Type, AlignCenter } from 'lucide-react'
+import { Download, Loader2, FileText, Layout, Maximize2, Hash, Droplets, ArrowUpDown, Heart, Info, Type, Zap, BookOpen, Camera, Archive } from 'lucide-react'
 import type { PDFOptions } from '@/app/page'
 
 interface Props {
@@ -39,11 +39,84 @@ const PAGE_NUM_STYLES = [
   { id: 'roman',   label: 'Roman',   desc: 'i / xii' },
 ] as const
 
+const PRESETS = [
+  {
+    id: 'web',
+    label: 'Web / Share',
+    icon: <Zap size={14} />,
+    desc: 'Small file, great for email',
+    opts: { quality: 0.65, pageSize: 'a4', margins: 'small', orientation: 'portrait', addPageNumbers: false } as Partial<PDFOptions>,
+  },
+  {
+    id: 'print',
+    label: 'Print Ready',
+    icon: <BookOpen size={14} />,
+    desc: 'High quality for printing',
+    opts: { quality: 0.92, pageSize: 'a4', margins: 'normal', orientation: 'portrait', addPageNumbers: true } as Partial<PDFOptions>,
+  },
+  {
+    id: 'photo',
+    label: 'Photo Book',
+    icon: <Camera size={14} />,
+    desc: 'Full-bleed, max quality',
+    opts: { quality: 1.0, pageSize: 'a4', margins: 'none', orientation: 'landscape', addPageNumbers: false } as Partial<PDFOptions>,
+  },
+  {
+    id: 'archive',
+    label: 'Archive',
+    icon: <Archive size={14} />,
+    desc: 'Compact, long-term storage',
+    opts: { quality: 0.45, pageSize: 'a4', margins: 'none', orientation: 'portrait', addPageNumbers: true } as Partial<PDFOptions>,
+  },
+]
+
 export default function PDFSettings({ options, imageCount, onChange, onConvert, isLoading }: Props) {
+  const applyPreset = (preset: typeof PRESETS[0]) => {
+    onChange({ ...options, ...preset.opts })
+  }
+
   return (
     <div>
       <div className="section-head">
         <h2 style={{ fontSize: '1.25rem' }}>Export Settings</h2>
+      </div>
+
+      {/* ── Quick presets ─────────────────── */}
+      <div style={{ marginBottom: 24 }}>
+        <label className="label" style={{ marginBottom: 10 }}>Quick Presets</label>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 8 }}>
+          {PRESETS.map(p => (
+            <button
+              key={p.id}
+              onClick={() => applyPreset(p)}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4,
+                padding: '12px 14px', borderRadius: 'var(--r-sm)',
+                border: '1.5px solid var(--glass-border)',
+                background: 'var(--bg-secondary)',
+                cursor: 'pointer', transition: 'var(--fast)',
+                textAlign: 'left', fontFamily: 'inherit',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.borderColor = 'var(--blue)'
+                ;(e.currentTarget as HTMLElement).style.background = 'var(--bg)'
+                ;(e.currentTarget as HTMLElement).style.boxShadow = '0 6px 12px rgba(0,0,0,0.06)'
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.borderColor = 'var(--glass-border)'
+                ;(e.currentTarget as HTMLElement).style.background = 'var(--bg-secondary)'
+                ;(e.currentTarget as HTMLElement).style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--blue)', fontWeight: 700 }}>
+                {p.icon}
+                <span style={{ fontSize: '0.84rem' }}>{p.label}</span>
+              </div>
+              <span style={{ fontSize: '0.74rem', color: 'var(--ink-2)', lineHeight: 1.3, fontWeight: 500 }}>{p.desc}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Settings grid */}
@@ -58,17 +131,18 @@ export default function PDFSettings({ options, imageCount, onChange, onConvert, 
           <div style={{
             display: 'flex', alignItems: 'center',
             background: 'var(--bg-secondary)',
-            border: '1.5px solid rgba(0,0,0,0.12)',
+            border: '2px solid var(--glass-border)',
             borderRadius: 'var(--r-sm)', overflow: 'hidden',
+            boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.03)',
           }}>
             <input
               id="fileName" type="text"
               value={options.fileName}
               onChange={e => onChange(set(options, 'fileName', e.target.value))}
-              style={{ flex: 1, border: 'none', background: 'transparent', boxShadow: 'none', borderRadius: 0 }}
+              style={{ flex: 1, border: 'none', background: 'transparent', boxShadow: 'none', borderRadius: 0, fontWeight: 500 }}
               placeholder="my-document"
             />
-            <span style={{ paddingRight: 12, color: 'var(--ink-3)', fontSize: '0.88rem', fontWeight: 600, flexShrink: 0 }}>.pdf</span>
+            <span style={{ paddingRight: 12, color: 'var(--ink-2)', fontSize: '0.88rem', fontWeight: 700, flexShrink: 0 }}>.pdf</span>
           </div>
         </div>
 
@@ -250,7 +324,7 @@ export default function PDFSettings({ options, imageCount, onChange, onConvert, 
             }
             <p style={{ fontSize: '0.78rem', color: 'var(--ink-2)', lineHeight: 1.45, margin: 0 }}>
               {options.includeWatermark
-                ? "Thank you! This tiny watermark helps IMG2PDF grow organically. It's placed safely outside all content areas."
+                ? "Thank you! This tiny watermark helps PDFTools grow organically. It's placed safely outside all content areas."
                 : "We'd really appreciate if you kept the watermark on — it helps others discover this free tool and won't cut any content."
               }
             </p>
@@ -264,7 +338,7 @@ export default function PDFSettings({ options, imageCount, onChange, onConvert, 
         className="btn btn-primary"
         style={{ width: '100%', padding: '16px', fontSize: '1rem', borderRadius: 'var(--r-md)', letterSpacing: '-0.01em' }}
         onClick={onConvert}
-        disabled={isLoading}
+        disabled={isLoading || imageCount === 0}
       >
         {isLoading
           ? <><Loader2 size={18} className="spinner" style={{ marginRight: 6 }} />Generating PDF…</>

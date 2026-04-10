@@ -35,9 +35,10 @@
 
 .heroSub {
   font-size: 1.15rem;
-  color: var(--ink-2);
-  max-width: 560px;
-  line-height: 1.55;
+  color: var(--ink);
+  max-width: 580px;
+  line-height: 1.6;
+  opacity: 0.92;
 }
 
 .main {
@@ -58,13 +59,13 @@
 .progressOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(255,255,255,0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--bg);
+  opacity: 0.98;
+  backdrop-filter: blur(20px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 900;
+  z-index: 1000;
 }
 
 @media (max-width: 640px) {
